@@ -28,6 +28,7 @@ use anyhow::{Context, Result};
 use crate::{
     audio_io::Output,
     frames::Writer,
+    #[cfg(not(target_os = "android"))]
     stream_worker::{Control, Report},
     video::{Next, Source, Video, fit},
 };
@@ -359,6 +360,7 @@ pub struct Playing {
 }
 
 /// Plays the video until Yapfast stops it, reporting what it does.
+#[cfg(not(target_os = "android"))]
 pub fn play(
     job: Playing,
     mut writer: Writer,
