@@ -73,6 +73,7 @@ pub mod new_tags;
 pub mod noise;
 pub mod picture;
 #[cfg(feature = "discord")]
+#[cfg(not(target_os = "android"))]
 pub mod playback;
 pub mod push_to_talk;
 #[cfg(feature = "discord")]
@@ -93,6 +94,7 @@ pub mod theme;
 #[cfg(feature = "discord")]
 pub mod video;
 #[cfg(feature = "discord")]
+#[cfg(not(target_os = "android"))]
 pub mod video_player;
 pub mod voice;
 #[cfg(feature = "matrix")]

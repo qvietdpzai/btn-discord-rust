@@ -149,6 +149,7 @@ pub(crate) enum Wake {
     Finished(Done),
     /// Time to put changed channels on disk.
     Save,
+    #[cfg(not(target_os = "android"))]
     Video(crate::playback::Wake),
     VoiceMessage(Option<crate::voice_message::Report>),
 }
@@ -167,6 +168,7 @@ pub(crate) struct Chat {
     pictures: discord::Pictures,
     saving: tokio::time::Interval,
     /// The video playing in the open channel or the thread beside it.
+    #[cfg(not(target_os = "android"))]
     video: Option<crate::playback::Playback>,
     /// How loud the last video played, and whether muted: the next plays
     /// the same.
@@ -218,7 +220,8 @@ impl Chat {
                 saving.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
                 saving
             },
-            video: None,
+            #[cfg(not(target_os = "android"))]
+    video: None,
             video_sound: (1.0, false),
             voice_message: None,
         }))
@@ -242,6 +245,7 @@ impl Chat {
                 self.pictures.prefetch(&self.discord, urls);
                 return;
             }
+            #[cfg(not(target_os = "android"))]
             Command::PlayVideo {
                 room,
                 item,
@@ -253,16 +257,25 @@ impl Chat {
                 self.play_video(room, item, index, (width, height), speakers, events);
                 return;
             }
+            #[cfg(target_os = "android")]
+            Command::PlayVideo { .. } => {
+                return;
+            }
             Command::Video(VideoCommand::Stop) => {
                 self.stop_video(events);
                 return;
             }
+            #[cfg(not(target_os = "android"))]
             Command::Video(command) => {
                 if let Some(playback) = &mut self.video {
                     playback.command(command);
                     self.video_sound = (playback.video.volume, playback.video.muted);
                     let _ = events.send(Event::Video(Some(playback.video.clone())));
                 }
+                return;
+            }
+            #[cfg(target_os = "android")]
+            Command::Video(_) => {
                 return;
             }
             Command::PlayVoiceMessage {
@@ -399,6 +412,7 @@ impl Chat {
 
     /// Plays an attachment's video in place of its poster, as it downloads,
     /// in place of any other.
+    #[cfg(not(target_os = "android"))]
     fn play_video(
         &mut self,
         room: String,
@@ -470,6 +484,7 @@ impl Chat {
             event = next_live(&mut self.live) => Wake::Live(event),
             Some(finished) = self.finished.recv() => Wake::Finished(finished),
             _ = self.saving.tick() => Wake::Save,
+            #[cfg(not(target_os = "android"))]
             wake = next_video(&mut self.video) => Wake::Video(wake),
             report = next_voice_message(&mut self.voice_message) => Wake::VoiceMessage(report),
         }
@@ -521,6 +536,7 @@ impl Chat {
                 );
             }
             Wake::Save => self.channels.save(),
+            #[cfg(not(target_os = "android"))]
             Wake::Video(wake) => {
                 if let Some(playback) = &mut self.video {
                     playback.handle(wake);
@@ -545,6 +561,7 @@ impl Chat {
 }
 
 /// What the playing video next does, or never without one.
+#[cfg(not(target_os = "android"))]
 async fn next_video(video: &mut Option<crate::playback::Playback>) -> crate::playback::Wake {
     match video {
         Some(playback) => playback.wait().await,
