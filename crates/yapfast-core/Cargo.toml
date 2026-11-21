@@ -15,11 +15,14 @@ workspace = true
 doctest = false
 
 [features]
-default = ["discord", "lottie"]
+default = ["discord", "discord-full", "lottie"]
 # Matrix: sign-in, encrypted rooms and MatrixRTC voice.
 matrix = ["dep:keyring", "dep:matrix-sdk", "dep:matrix-sdk-ui", "dep:matrix-sdk-crypto", "dep:matrix-rtc-livekit", "dep:matrix-rtc-core", "dep:matrix-rtc-media", "dep:mime", "dep:url", "dep:webrtc-sys"]
 # Discord through the account linked on this device; see docs/discord/README.md.
 discord = ["dep:yapfast-discord", "dep:rand", "dep:base64", "dep:nnnoiseless", "dep:deep_filter", "dep:ndarray", "dep:x264-src", "dep:ffmpeg-src"]
+# Desktop Discord: token storage and game detection, which need platform support
+# Android does not have yet.
+discord-full = ["discord", "yapfast-discord/os-keyring", "yapfast-discord/game-detection", "yapfast-discord/voice"]
 # Lottie stickers (ThorVG). Off on Android, whose bindgen cannot see the NDK's
 # stdint types without more build work.
 lottie = ["dep:thorvg-sys"]
@@ -74,7 +77,7 @@ pulldown-cmark = { version = "0.13", default-features = false }
 rustls.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-yapfast-discord = { path = "../yapfast-discord", optional = true }
+yapfast-discord = { path = "../yapfast-discord", optional = true, default-features = false }
 # Go Live's and the camera's H264 encoder, built from source; see native/h264.c.
 x264-src = { path = "../../vendor/x264-src", optional = true }
 # Go Live's hardware encoders, FFmpeg's, built from source; see native/hwenc.c.
