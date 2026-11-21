@@ -26,6 +26,10 @@
           name = "cargo-xwin-${version}";
           hash = "sha256-FRK4bCTPAPWGov8vEFr9XdqCNoeXeyFdyiWV5x+4WYY=";
         };
+        # Its unit tests read this build's own compiler flags and fail on the
+        # static CRT the development shell asks for; the binary is what the
+        # shell needs, so its tests do not run here.
+        doCheck = false;
       });
       windowsWebrtcArchive = pkgs.fetchurl {
         url = "https://github.com/livekit/rust-sdks/releases/download/webrtc-51ef663/webrtc-win-x64-release.zip";

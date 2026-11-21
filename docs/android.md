@@ -15,6 +15,11 @@ runs on a phone today, what stops the rest, and the order to take the stops in.
   `armeabi-v7a` and `x86_64` with `cargo ndk`, packs `assembleDebug`, and keeps
   the APK as a build artifact.
 
+What that workflow has built: the bridge's host test passes, the three
+`libbtn_android.so` files are in the APK (645 KB arm64, 395 KB armv7, 603 KB
+x86_64), and `app-debug.apk` is 1.7 MB. The `discord` feature job is the one
+that fails, at `webrtc-sys`, as step 1 below says.
+
 The Rust bridge exposes three calls:
 
 | Java (`Native.java`) | Rust | Answer |
@@ -73,9 +78,16 @@ build never enables it.
 Each step ends with something that runs on a phone.
 
 1. **Protocol.** Make `yapfast-discord` build for `aarch64-linux-android`:
-   gate `keyring` behind a feature, make `game_detection` empty, and keep
-   `webrtc-sys` to the targets that have an archive. `cargo ndk build
-   --features discord --manifest-path android/rust/Cargo.toml` is the check.
+   gate `keyring` behind a feature, make `game_detection` empty, and fix the
+   C++ shim `webrtc-sys` compiles. The first CI run of the `discord` feature
+   got through every Rust crate and stopped there: its patched
+   `src/packet_trailer.cpp` asks for `webrtc::ArrayView`, and the Android arm64
+   libwebrtc archive's headers do not have it (`packet_trailer.h:169`, then
+   `packet_trailer.cpp:101`). The Android build needs the crate's own sources
+   for that archive, or a newer archive, before the first two screens can use
+   the protocol. `cargo ndk build --features discord --manifest-path
+   android/rust/Cargo.toml` is the check, and the CI job with the same name
+   runs it.
 2. **Sign-in and the gateway.** Add JNI calls that start a `Backend`, hand its
    events to Kotlin through a callback, and replace the token store. The first
    screen that matters shows a server's channel list from real events.
