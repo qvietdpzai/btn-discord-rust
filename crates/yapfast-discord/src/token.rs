@@ -5,6 +5,8 @@
 use std::sync::{Mutex, OnceLock};
 
 use anyhow::{Result, anyhow, bail};
+
+#[cfg(feature = "os-keyring")]
 use keyring::Entry;
 
 const SERVICE: &str = "io.github.yapfast.Yapfast";
@@ -16,10 +18,12 @@ const EARLIER_ACCOUNT: &str = "discord-probe-token";
 /// The key of the files [`crate::cache`] keeps, in hex.
 const CACHE_KEY: &str = "discord-cache-key";
 
+#[cfg(feature = "os-keyring")]
 fn entry() -> Result<Entry> {
     named(ACCOUNT)
 }
 
+#[cfg(feature = "os-keyring")]
 fn named(account: &str) -> Result<Entry> {
     Entry::new(SERVICE, account).map_err(|_| anyhow!("could not access the OS credential store"))
 }
@@ -56,9 +60,18 @@ pub fn store(token: &str) -> Result<()> {
             .unwrap_or_else(|poisoned| poisoned.into_inner()) = Some(token);
         return Ok(());
     }
-    entry()?
-        .set_password(&token)
-        .map_err(|_| anyhow!("could not save the token in the OS credential store"))
+    #[cfg(feature = "os-keyring")]
+    {
+        entry()?
+            .set_password(&token)
+            .map_err(|_| anyhow!("could not save the token in the OS credential store"))?;
+        Ok(())
+    }
+    #[cfg(not(feature = "os-keyring"))]
+    {
+        let _ = token;
+        Err(NotLinked.into())
+    }
 }
 
 pub fn load() -> Result<String> {
@@ -69,19 +82,26 @@ pub fn load() -> Result<String> {
             .clone()
             .ok_or_else(|| NotLinked.into());
     }
-    match entry()?.get_password() {
-        Ok(token) => return Ok(token),
-        Err(keyring::Error::NoEntry) => {}
-        Err(_) => bail!("could not read the token from the OS credential store"),
-    }
-    match named(EARLIER_ACCOUNT)?.get_password() {
-        Ok(token) => {
-            store(&token)?;
-            let _ = named(EARLIER_ACCOUNT)?.delete_credential();
-            Ok(token)
+    #[cfg(feature = "os-keyring")]
+    {
+        match entry()?.get_password() {
+            Ok(token) => return Ok(token),
+            Err(keyring::Error::NoEntry) => {}
+            Err(_) => bail!("could not read the token from the OS credential store"),
         }
-        Err(keyring::Error::NoEntry) => Err(NotLinked.into()),
-        Err(_) => bail!("could not read the token from the OS credential store"),
+        match named(EARLIER_ACCOUNT)?.get_password() {
+            Ok(token) => {
+                store(&token)?;
+                let _ = named(EARLIER_ACCOUNT)?.delete_credential();
+                Ok(token)
+            }
+            Err(keyring::Error::NoEntry) => Err(NotLinked.into()),
+            Err(_) => bail!("could not read the token from the OS credential store"),
+        }
+    }
+    #[cfg(not(feature = "os-keyring"))]
+    {
+        Err(NotLinked.into())
     }
 }
 
@@ -92,22 +112,31 @@ pub(crate) fn cache_key() -> Result<crate::cache::Key> {
     if crate::client::test_server().is_some() {
         return Ok([7; 32]);
     }
-    let entry = named(CACHE_KEY)?;
-    match entry.get_password() {
-        Ok(hex) => {
-            if let Some(key) = crate::cache::read_key(&hex) {
-                return Ok(key);
+    #[cfg(feature = "os-keyring")]
+    {
+        let entry = named(CACHE_KEY)?;
+        match entry.get_password() {
+            Ok(hex) => {
+                if let Some(key) = crate::cache::read_key(&hex) {
+                    return Ok(key);
+                }
             }
+            Err(keyring::Error::NoEntry) => {}
+            Err(_) => bail!("could not read the cache key from the OS credential store"),
         }
-        Err(keyring::Error::NoEntry) => {}
-        Err(_) => bail!("could not read the cache key from the OS credential store"),
+        // None yet, or one that isn't a key: what it encrypted can't be read.
+        let key = crate::cache::new_key();
+        entry
+            .set_password(&crate::cache::write_key(&key))
+            .map_err(|_| anyhow!("could not save the cache key in the OS credential store"))?;
+        Ok(key)
     }
-    // None yet, or one that isn't a key: what it encrypted can't be read.
-    let key = crate::cache::new_key();
-    entry
-        .set_password(&crate::cache::write_key(&key))
-        .map_err(|_| anyhow!("could not save the cache key in the OS credential store"))?;
-    Ok(key)
+    #[cfg(not(feature = "os-keyring"))]
+    {
+        // No OS credential store on this platform; a fixed key keeps the
+        // cache working for the preview, with no persistence between runs.
+        Ok([7; 32])
+    }
 }
 
 pub fn forget() -> Result<()> {
@@ -118,10 +147,13 @@ pub fn forget() -> Result<()> {
             .unwrap_or_else(|poisoned| poisoned.into_inner()) = None;
         return Ok(());
     }
-    for account in [ACCOUNT, EARLIER_ACCOUNT, CACHE_KEY] {
-        match named(account)?.delete_credential() {
-            Ok(()) | Err(keyring::Error::NoEntry) => {}
-            Err(_) => bail!("could not remove the token from the OS credential store"),
+    #[cfg(feature = "os-keyring")]
+    {
+        for account in [ACCOUNT, EARLIER_ACCOUNT, CACHE_KEY] {
+            match named(account)?.delete_credential() {
+                Ok(()) | Err(keyring::Error::NoEntry) => {}
+                Err(_) => bail!("could not remove the token from the OS credential store"),
+            }
         }
     }
     Ok(())

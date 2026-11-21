@@ -5,8 +5,11 @@ pub mod activity;
 pub mod activity_feed;
 pub mod api;
 pub mod cache;
+#[cfg(feature = "voice")]
 mod call_connection;
+#[cfg(feature = "voice")]
 pub mod call_stats;
+#[cfg(feature = "voice")]
 pub mod call_video;
 pub mod captcha;
 pub mod client;
@@ -20,6 +23,7 @@ pub mod embed;
 pub mod event;
 pub mod forum;
 pub mod frecency;
+#[cfg(feature = "game-detection")]
 pub mod game_detection;
 pub mod gateway;
 pub mod gifs;
@@ -35,6 +39,7 @@ pub mod message;
 pub mod mfa;
 pub mod notifications;
 pub mod oauth;
+#[cfg(feature = "voice")]
 pub mod opus;
 pub mod own_activity;
 pub mod profile;
@@ -53,9 +58,11 @@ pub mod soundboard;
 mod spotify;
 pub mod stickers;
 pub mod stream;
+#[cfg(feature = "voice")]
 pub mod stream_connection;
 pub mod token;
 pub mod unread;
+#[cfg(feature = "voice")]
 pub mod voice;
 mod voice_connection;
 mod websocket;

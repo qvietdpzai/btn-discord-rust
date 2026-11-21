@@ -32,12 +32,9 @@ android_logger = "0.14"
 # unfinished; see docs/android.md.
 discord = ["dep:yapfast-discord"]
 
-# A git dependency, not a path one: a path dependency that is a member of the
-# repository's workspace inherits its [patch.crates-io], which replaces
-# webrtc-sys with the vendored copy whose C++ shim does not build for Android.
-# The git copy is resolved on its own, so it uses the published crate.
+# Voice is off on Android (no usable libwebrtc archive yet), so webrtc-sys is
+# never pulled in and the desktop workspace's vendored patch does not matter.
 [dependencies.yapfast-discord]
-git = "https://github.com/qvietdpzai/btn-discord-rust.git"
-branch = "main"
-path = "crates/yapfast-discord"
+path = "../../crates/yapfast-discord"
 optional = true
+default-features = false

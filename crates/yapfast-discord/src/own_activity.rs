@@ -43,7 +43,14 @@ pub(crate) fn start(
     tokio::spawn(async move {
         loop {
             if *shown.borrow_and_update() {
+                #[cfg(feature = "game-detection")]
                 let detected = crate::game_detection::start(api.clone());
+                #[cfg(not(feature = "game-detection"))]
+                let detected = {
+                    let (sender, receiver) = watch::channel(None);
+                    drop(sender);
+                    receiver
+                };
                 #[cfg(target_os = "linux")]
                 let rpc = crate::rpc::start(api.clone(), snapshots.clone());
                 #[cfg(not(target_os = "linux"))]

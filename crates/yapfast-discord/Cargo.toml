@@ -14,6 +14,27 @@ workspace = true
 # crate on every `cargo test` for none.
 doctest = false
 
+[[bin]]
+name = "yapfast-discord-probe"
+path = "src/bin/yapfast-discord-probe.rs"
+required-features = ["voice"]
+
+[[bin]]
+name = "yapfast-game-detection-probe"
+path = "src/bin/yapfast-game-detection-probe.rs"
+
+[features]
+default = ["voice", "os-keyring", "game-detection"]
+# Opus and the call machinery: needs libwebrtc. Off on Android, whose archive
+# does not match the vendored patch yet (docs/android.md).
+voice = ["dep:webrtc-sys"]
+# The OS credential store holds the token and the cache key. Off on platforms
+# without it, such as Android, where EncryptedSharedPreferences takes over.
+os-keyring = ["dep:keyring"]
+# Rich Presence game detection, which reads the running processes. Off on
+# platforms without a usable process list or a desktop to detect for.
+game-detection = ["dep:sysinfo"]
+
 [dependencies]
 chrono.workspace = true
 # Voice's transport encryption, and DAVE. ChaCha's stream also encrypts the
@@ -34,7 +55,7 @@ futures-util.workspace = true
 # The time zone the web client names in X-Discord-Timezone; chrono
 # already builds it.
 iana-time-zone = "0.1.65"
-keyring.workspace = true
+keyring = { workspace = true, optional = true }
 reqwest = { version = "0.13", default-features = false, features = ["cookies", "http2", "rustls-no-provider"] }
 cookie_store = { version = "0.22", features = ["serde_json"] }
 rustls.workspace = true
@@ -42,7 +63,7 @@ rustls.workspace = true
 rustls-platform-verifier = "0.7"
 serde.workspace = true
 serde_json.workspace = true
-sysinfo = { version = "0.39.6", default-features = false, features = ["system"] }
+sysinfo = { version = "0.39.6", default-features = false, features = ["system"], optional = true }
 tempfile.workspace = true
 # The voice gateway's messages, DAVE's among them.
 serenity-voice-model = "0.3"
@@ -52,8 +73,9 @@ tokio-tungstenite = { version = "0.26", default-features = false, features = ["c
 tracing.workspace = true
 tracing-subscriber.workspace = true
 url.workspace = true
-# Links Yapfast's libwebrtc archive, whose libopus calls use.
-webrtc-sys = "=0.3.35"
+# Links Yapfast's libwebrtc archive, whose libopus calls use. Optional: voice
+# and calls need it; platforms without a usable archive build without it.
+webrtc-sys = { version = "=0.3.35", optional = true }
 
 # The Rich Presence socket's lock opens with O_NOFOLLOW, whose value differs
 # from one processor to another.
