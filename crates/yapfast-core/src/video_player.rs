@@ -25,11 +25,11 @@ use std::{
 
 use anyhow::{Context, Result};
 
+#[cfg(not(target_os = "android"))]
+use crate::stream_worker::{Control, Report};
 use crate::{
     audio_io::Output,
     frames::Writer,
-    #[cfg(not(target_os = "android"))]
-    stream_worker::{Control, Report},
     video::{Next, Source, Video, fit},
 };
 
