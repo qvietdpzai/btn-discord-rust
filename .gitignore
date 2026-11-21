@@ -1,5 +1,14 @@
 /target
 /result
+
+# The Android shell's build: Gradle's output and the library cargo-ndk writes
+# beside the Java sources.
+/android/.gradle/
+/android/build/
+/android/app/build/
+/android/local.properties
+/android/rust/target/
+/android/app/src/main/jniLibs/
 /inspirations
 /.local
 /.impeccable/review

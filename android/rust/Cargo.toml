@@ -1,0 +1,35 @@
+[package]
+name = "btn-android"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.97"
+publish = false
+license = "GPL-3.0-or-later"
+description = "The JNI bridge the Btn Discord Android shell loads"
+
+# A workspace of its own: the repository's workspace builds the desktop app,
+# whose window (iced and winit) has no Android backend, so this crate is kept
+# out of it and cross-compiled on its own with cargo-ndk.
+[workspace]
+
+[lib]
+name = "btn_android"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+jni = "0.21"
+log = "0.4"
+
+[target.'cfg(target_os = "android")'.dependencies]
+android_logger = "0.14"
+
+[features]
+# Links the Discord protocol crate, the part of the program that may compile
+# for Android once its desktop-only dependencies (OS keyring, sysinfo) are
+# gated. Off by default: `cargo ndk build` must stay green while that port is
+# unfinished; see docs/android.md.
+discord = ["dep:yapfast-discord"]
+
+[dependencies.yapfast-discord]
+path = "../../crates/yapfast-discord"
+optional = true

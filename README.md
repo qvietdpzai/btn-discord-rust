@@ -2,7 +2,16 @@
   <img src="packaging/icon.svg" width="96" height="96" alt="">
 </p>
 
-<h1 align="center">Yapfast</h1>
+<h1 align="center">Btn Discord</h1>
+
+> **A fork of [Yapfast](https://github.com/yapfast/yapfast), renamed
+> btn-discord-rust.** The desktop app is Yapfast's, unchanged and under the same
+> licence, GPL-3.0-or-later; the fork adds an Android shell, `android/`, and the
+> two workflows that build it and the desktop releases. What runs on a phone so
+> far, and the order to finish the port: [docs/android.md](docs/android.md).
+> The crate names `yapfast-*` stay as upstream wrote them, because every import
+> and packaging script names them; the product the Android shell shows is Btn
+> Discord.
 
 <p align="center">
   <a href="https://github.com/yapfast/yapfast/releases/latest"><img src="https://img.shields.io/github/v/release/yapfast/yapfast?label=beta&color=f0b232" alt="The latest release, a beta"></a>
