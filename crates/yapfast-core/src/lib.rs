@@ -18,6 +18,7 @@ pub mod backend;
 pub mod blocks;
 pub mod call_details;
 #[cfg(feature = "matrix")]
+#[cfg(not(target_os = "android"))]
 pub mod calls;
 pub mod camera;
 pub mod chat;
@@ -41,6 +42,7 @@ pub mod discord_text;
 #[cfg(feature = "discord")]
 mod discord_video;
 #[cfg(feature = "discord")]
+#[cfg(not(target_os = "android"))]
 mod discord_voice;
 pub mod dominant_colour;
 pub mod emoji;
@@ -85,7 +87,7 @@ pub mod sounds;
 pub mod spoiler;
 #[cfg(feature = "discord")]
 pub mod stream_audio;
-#[cfg(feature = "discord")]
+#[cfg(all(feature = "discord", not(target_os = "android")))]
 pub mod stream_worker;
 pub mod theme;
 #[cfg(feature = "discord")]

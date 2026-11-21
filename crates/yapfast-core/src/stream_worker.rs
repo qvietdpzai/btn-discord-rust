@@ -214,11 +214,17 @@ pub fn shareable() -> Vec<Shareable> {
 }
 
 fn screens_and_windows() -> Vec<Shareable> {
-    if portal_picks() {
+    #[cfg(target_os = "android")]
+    {
         return Vec::new();
     }
-    use livekit::webrtc::desktop_capturer::DesktopCaptureSourceType;
-    let screens = sources(DesktopCaptureSourceType::Screen);
+    #[cfg(not(target_os = "android"))]
+    {
+        if portal_picks() {
+            return Vec::new();
+        }
+        use livekit::webrtc::desktop_capturer::DesktopCaptureSourceType;
+        let screens = sources(DesktopCaptureSourceType::Screen);
     let count = screens.len();
     let screens = screens
         .into_iter()
@@ -248,6 +254,7 @@ fn screens_and_windows() -> Vec<Shareable> {
             })
         });
     screens.chain(windows).collect()
+    }
 }
 
 fn sources(

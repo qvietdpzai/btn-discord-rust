@@ -339,7 +339,14 @@ pub(super) async fn preview(discord: &Discord, url: &str) -> Option<Arc<Picture>
 /// Lottie when `url` is a Lottie sticker's, which nothing else is.
 pub(super) fn decode(url: &str, data: &[u8], (width, height): (u32, u32)) -> Option<Picture> {
     let picture = if yapfast_discord::ready::lottie_sticker(url) {
-        crate::chat::decode_lottie(data, width, height)
+        #[cfg(feature = "lottie")]
+        {
+            crate::chat::decode_lottie(data, width, height)
+        }
+        #[cfg(not(feature = "lottie"))]
+        {
+            crate::chat::decode_picture(data, width, height)
+        }
     } else {
         crate::chat::decode_picture(data, width, height)
     };

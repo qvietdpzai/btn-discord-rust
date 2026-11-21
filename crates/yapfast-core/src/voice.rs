@@ -598,7 +598,7 @@ async fn join(
     snapshots: &watch::Sender<State>,
     remembered: Option<&Path>,
 ) -> Result<()> {
-    #[cfg(feature = "discord")]
+    #[cfg(all(feature = "discord", not(target_os = "android")))]
     if crate::network::Network::of(&id) == crate::network::Network::Discord {
         let discord = calls.discord.borrow().clone();
         return match (discord, crate::discord::parse_room(&id)) {
