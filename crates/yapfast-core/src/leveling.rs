@@ -19,7 +19,8 @@ pub fn enabled() -> bool {
 }
 
 /// Levels the microphone in LiveKit's calls too, which WebRTC captures itself,
-/// and sets its volume.
+/// and sets its volume. Only available where libwebrtc is linked.
+#[cfg(feature = "matrix")]
 pub fn install() {
     static INSTALL: std::sync::Once = std::sync::Once::new();
     INSTALL.call_once(|| {
@@ -27,8 +28,10 @@ pub fn install() {
     });
 }
 
+#[cfg(feature = "matrix")]
 struct Capture(Leveler);
 
+#[cfg(feature = "matrix")]
 impl webrtc_sys::capture::CaptureProcessor for Capture {
     fn ramp(&mut self, samples: &[f32], sample_rate: u32) -> (f32, f32) {
         self.0

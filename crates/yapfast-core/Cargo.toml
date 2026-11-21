@@ -17,7 +17,7 @@ doctest = false
 [features]
 default = ["discord"]
 # Matrix: sign-in, encrypted rooms and MatrixRTC voice.
-matrix = ["dep:keyring", "dep:matrix-sdk", "dep:matrix-sdk-ui", "dep:matrix-sdk-crypto", "dep:matrix-rtc-livekit", "dep:matrix-rtc-core", "dep:matrix-rtc-media", "dep:mime", "dep:url"]
+matrix = ["dep:keyring", "dep:matrix-sdk", "dep:matrix-sdk-ui", "dep:matrix-sdk-crypto", "dep:matrix-rtc-livekit", "dep:matrix-rtc-core", "dep:matrix-rtc-media", "dep:mime", "dep:url", "dep:webrtc-sys"]
 # Discord through the account linked on this device; see docs/discord/README.md.
 discord = ["dep:yapfast-discord", "dep:rand", "dep:base64", "dep:nnnoiseless", "dep:deep_filter", "dep:ndarray", "dep:x264-src", "dep:ffmpeg-src", "dep:thorvg-sys"]
 # Sample states other crates' tests start from, such as a Discord server
@@ -86,7 +86,7 @@ uuid.workspace = true
 url = { workspace = true, optional = true }
 # Levels the voice in LiveKit's calls, and sends the camera from pooled
 # buffers, through Yapfast's patch to its WebRTC bindings.
-webrtc-sys = "=0.3.35"
+webrtc-sys = { version = "=0.3.35", optional = true }
 # Holds the camera's video source from those bindings.
 cxx = "1"
 

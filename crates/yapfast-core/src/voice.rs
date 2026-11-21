@@ -687,6 +687,7 @@ pub(crate) fn devices(state: &mut State) -> Result<()> {
 }
 
 pub(crate) fn audio() -> Result<PlatformAudio> {
+    #[cfg(feature = "matrix")]
     crate::leveling::install();
     PlatformAudio::new().map_err(|_| {
         anyhow::anyhow!(
