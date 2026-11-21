@@ -18,6 +18,7 @@ pub mod commands;
 pub mod components;
 pub mod congestion;
 pub mod cookies;
+#[cfg(feature = "voice")]
 mod dave;
 pub mod embed;
 pub mod event;
