@@ -85,9 +85,8 @@ jobs:
           path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
 
-  # Not part of the APK's job: the Discord protocol crate still needs its
-  # desktop-only dependencies gated for Android (docs/android.md, step 1).
-  # It reports how far that has got without failing the run.
+  # The Discord protocol crate, with voice and the OS credential store off.
+  # Reports progress without failing the run.
   discord-protocol:
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -106,3 +105,24 @@ jobs:
           cargo ndk -t arm64-v8a -o target/android \
             --manifest-path android/rust/Cargo.toml \
             build --release --features discord
+
+  # The model crate, without Matrix: the first piece a sign-in screen needs.
+  core:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.97.1"
+          targets: aarch64-linux-android
+      - name: Build yapfast-core for Android
+        run: |
+          echo "ANDROID_NDK_HOME=${ANDROID_NDK_LATEST_HOME:-$ANDROID_NDK_HOME}" >> "$GITHUB_ENV"
+          NDK="${ANDROID_NDK_LATEST_HOME:-$ANDROID_NDK_HOME}"
+          export CC_aarch64_linux_android="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang"
+          export CXX_aarch64_linux_android="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++"
+          export AR_aarch64_linux_android="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
+          rustup target add aarch64-linux-android
+          cargo build --locked --target aarch64-linux-android \
+            -p yapfast-core --no-default-features --features discord
