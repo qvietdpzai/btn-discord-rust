@@ -94,7 +94,6 @@ pub mod theme;
 #[cfg(feature = "discord")]
 pub mod video;
 #[cfg(feature = "discord")]
-#[cfg(not(target_os = "android"))]
 pub mod video_player;
 pub mod voice;
 #[cfg(feature = "matrix")]
