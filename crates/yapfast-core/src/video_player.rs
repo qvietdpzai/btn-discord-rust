@@ -428,6 +428,7 @@ pub fn play(
 
 /// The job's own thread: shows pictures as the clock reaches them and takes
 /// Yapfast's controls, until it stops.
+#[cfg(not(target_os = "android"))]
 fn show(
     shared: &Shared,
     writer: &mut Writer,
@@ -517,6 +518,7 @@ fn show(
 }
 
 /// Applies one of Yapfast's controls.
+#[cfg(not(target_os = "android"))]
 fn take(shared: &Shared, progress: &Progress, control: Control) {
     let mut state = shared.lock();
     match control {
