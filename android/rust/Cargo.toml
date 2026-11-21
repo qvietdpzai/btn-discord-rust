@@ -32,9 +32,18 @@ android_logger = "0.14"
 # unfinished; see docs/android.md.
 discord = ["dep:yapfast-discord"]
 
+# The model crate, which can start a Backend and read its events.
+core = ["dep:yapfast-core"]
+
 # Voice is off on Android (no usable libwebrtc archive yet), so webrtc-sys is
 # never pulled in and the desktop workspace's vendored patch does not matter.
 [dependencies.yapfast-discord]
 path = "../../crates/yapfast-discord"
 optional = true
 default-features = false
+
+[dependencies.yapfast-core]
+path = "../../crates/yapfast-core"
+optional = true
+default-features = false
+features = ["discord"]

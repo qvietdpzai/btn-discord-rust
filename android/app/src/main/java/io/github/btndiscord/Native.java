@@ -37,4 +37,10 @@ public final class Native {
      * @return whether the shell may keep its files there
      */
     public static native boolean initialize(String logDirectory);
+
+    /**
+     * Starts a backend the way sign-in will, and reports what happened.
+     * Returns {@code null} when the library was built without the model crate.
+     */
+    public static native String backendProbe(String logDirectory);
 }

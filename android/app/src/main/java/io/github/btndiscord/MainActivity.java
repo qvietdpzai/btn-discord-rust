@@ -56,6 +56,14 @@ public final class MainActivity extends Activity {
         report.append("Files: ").append(directory).append('\n');
         report.append("Writable: ").append(Native.initialize(directory)).append("\n\n");
         report.append("Capabilities:\n").append(Native.capabilities()).append("\n\n");
+        try {
+            String probe = Native.backendProbe(directory);
+            if (probe != null) {
+                report.append("Backend probe: ").append(probe).append("\n\n");
+            }
+        } catch (UnsatisfiedLinkError error) {
+            report.append("Backend probe: unavailable in this build.\n\n");
+        }
         report.append("This build draws no chat yet. docs/android.md lists what ")
                 .append("the port needs, in order: an Android UI for AppState, ")
                 .append("token storage, audio, calls, then the release's packaging.");

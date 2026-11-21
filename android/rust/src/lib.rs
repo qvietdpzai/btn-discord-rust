@@ -90,6 +90,51 @@ fn start_logging() {
     log::info!("btn-discord {VERSION} started");
 }
 
+/// Starts a backend the way the shell will on sign-in, and reports what
+/// happened. This is the slice's proof that the model crate runs on Android:
+/// it creates the runtime, opens the backend against the directory the shell
+/// keeps its files in, and waits briefly for its first event.
+#[cfg(feature = "core")]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_io_github_btndiscord_Native_backendProbe<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    log_directory: JString<'local>,
+) -> jstring {
+    let Ok(directory) = env.get_string(&log_directory) else {
+        return string(&mut env, "error: bad directory");
+    };
+    let directory = std::path::PathBuf::from(String::from(directory));
+    if std::fs::create_dir_all(&directory).is_err() {
+        return string(&mut env, "error: cannot create directory");
+    }
+
+    let result = std::panic::catch_unwind(|| {
+        let runtime = match yapfast_core::runtime::BackgroundRuntime::new() {
+            Ok(runtime) => std::sync::Arc::new(runtime),
+            Err(error) => return format!("error: runtime: {error}"),
+        };
+        let (backend, mut events) = yapfast_core::backend::Backend::start(
+            runtime.clone(),
+            directory,
+            yapfast_core::chat::Start::Restore,
+        );
+        // Wait briefly for the first event, if any.
+        let first = runtime.block_on(async {
+            tokio::time::timeout(std::time::Duration::from_secs(2), events.recv()).await
+        });
+        let summary = match first {
+            Ok(Some(event)) => format!("started; first event: {event:?}"),
+            Ok(None) => "started; event stream closed".to_owned(),
+            Err(_) => "started; no event within 2 s".to_owned(),
+        };
+        drop(backend);
+        summary
+    });
+    let answer = result.unwrap_or_else(|_| "error: panic in backend".to_owned());
+    string(&mut env, &answer)
+}
+
 /// A Rust string as a Java string, or null if the JVM is out of memory.
 fn string(env: &mut JNIEnv<'_>, value: &str) -> jstring {
     match env.new_string(value) {
