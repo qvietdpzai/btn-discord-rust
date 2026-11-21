@@ -12,11 +12,7 @@ description = "The JNI bridge the Btn Discord Android shell loads"
 # out of it and cross-compiled on its own with cargo-ndk.
 [workspace]
 
-# The desktop build patches webrtc-sys to a vendored copy whose C++ shim
-# (packet_trailer.cpp) does not match the Android archive's headers. This
-# workspace uses the published crate instead, whose build supports Android.
-[patch.crates-io]
-webrtc-sys = { version = "=0.3.35" }
+
 
 [lib]
 name = "btn_android"
