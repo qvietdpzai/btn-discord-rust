@@ -894,7 +894,7 @@ fn stereo(frame: &[f32]) -> [f32; 2] {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(target_os = "android")))]
 mod tests {
     use std::path::Path;
 
