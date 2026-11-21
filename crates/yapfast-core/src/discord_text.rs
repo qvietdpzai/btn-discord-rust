@@ -262,6 +262,7 @@ impl Chat {
                 return;
             }
             Command::Video(VideoCommand::Stop) => {
+                #[cfg(not(target_os = "android"))]
                 self.stop_video(events);
                 return;
             }
@@ -313,12 +314,14 @@ impl Chat {
             // A video or voice message plays only while its channel is
             // open, or its thread beside it.
             Command::Open(_) | Command::CloseRoom => {
+                #[cfg(not(target_os = "android"))]
                 self.stop_video(events);
                 self.stop_voice_message(events);
             }
             Command::Aside(ref beside) => {
                 let shown = self.channels.aside.as_ref().map(|aside| &aside.room);
                 let closes = |room: &String| shown == Some(room) && beside.as_ref() != Some(room);
+                #[cfg(not(target_os = "android"))]
                 let video = self
                     .video
                     .as_ref()
@@ -327,6 +330,7 @@ impl Chat {
                     .voice_message
                     .as_ref()
                     .is_some_and(|player| closes(&player.playback.room));
+                #[cfg(not(target_os = "android"))]
                 if video {
                     self.stop_video(events);
                 }
@@ -345,6 +349,7 @@ impl Chat {
         );
     }
 
+    #[cfg(not(target_os = "android"))]
     fn stop_video(&mut self, events: &UnboundedSender<Event>) {
         if self.video.take().is_some() {
             let _ = events.send(Event::Video(None));
