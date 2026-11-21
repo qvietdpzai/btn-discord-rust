@@ -65,6 +65,7 @@ pub mod token;
 pub mod unread;
 #[cfg(feature = "voice")]
 pub mod voice;
+#[cfg(feature = "voice")]
 mod voice_connection;
 mod websocket;
 pub mod widgets;
