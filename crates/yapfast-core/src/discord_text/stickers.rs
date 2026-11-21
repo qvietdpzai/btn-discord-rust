@@ -124,7 +124,14 @@ async fn sticker_picture(discord: &Discord, url: &str) -> Option<Picture> {
     tokio::task::spawn_blocking(move || {
         // Only a Lottie sticker's address reaches ThorVG's parser.
         if lottie {
-            crate::chat::decode_lottie(&data, size, size)
+            #[cfg(feature = "lottie")]
+            {
+                crate::chat::decode_lottie(&data, size, size)
+            }
+            #[cfg(not(feature = "lottie"))]
+            {
+                crate::chat::decode_picture(&data, size, size)
+            }
         } else {
             crate::chat::decode_picture(&data, size, size)
         }

@@ -54,7 +54,7 @@ pub mod layout_file;
 pub mod leveling;
 pub mod links;
 pub mod logging;
-#[cfg(feature = "discord")]
+#[cfg(all(feature = "discord", feature = "lottie"))]
 mod lottie;
 #[cfg(feature = "matrix")]
 mod matrix_chat;

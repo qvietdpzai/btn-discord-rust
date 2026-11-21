@@ -1688,7 +1688,7 @@ impl Picture {
             return Box::new(std::iter::empty());
         };
         let frames: Box<dyn Iterator<Item = Vec<u8>>> = match animation.format {
-            #[cfg(feature = "discord")]
+            #[cfg(all(feature = "discord", feature = "lottie"))]
             AnimationFormat::Lottie => {
                 let frames = match file {
                     // The JSON held already, rather than a copy of it.
@@ -4819,17 +4819,20 @@ pub fn decode_picture_at(file: &std::path::Path, width: u32, height: u32) -> Opt
 /// Only what [`yapfast_discord::ready::lottie_sticker`] names comes here:
 /// ThorVG's parser never sees pictures from anyone else.
 #[cfg(feature = "discord")]
+#[cfg(feature = "lottie")]
 pub(crate) fn decode_lottie(data: &[u8], width: u32, height: u32) -> Option<Picture> {
     decode_kept_lottie(data, width, height, None)
 }
 
 /// [`decode_lottie`] for the JSON in `file`.
 #[cfg(all(test, feature = "discord"))]
+#[cfg(feature = "lottie")]
 pub(crate) fn decode_lottie_at(file: &std::path::Path, width: u32, height: u32) -> Option<Picture> {
     decode_kept_lottie(&std::fs::read(file).ok()?, width, height, Some(file))
 }
 
 #[cfg(feature = "discord")]
+#[cfg(feature = "lottie")]
 fn decode_kept_lottie(
     data: &[u8],
     width: u32,
