@@ -33,7 +33,7 @@ pub mod decode;
 #[cfg(feature = "discord")]
 mod dereverb;
 pub mod discord;
-#[cfg(feature = "discord")]
+#[cfg(all(feature = "discord", feature = "discord-full"))]
 pub mod discord_audio;
 #[cfg(feature = "discord")]
 pub mod discord_link;
@@ -82,7 +82,7 @@ pub mod runtime;
 pub mod search_words;
 #[cfg(feature = "matrix")]
 pub mod session;
-#[cfg(feature = "discord")]
+#[cfg(all(feature = "discord", feature = "discord-full"))]
 pub mod soundboard;
 pub mod sounds;
 pub mod spoiler;
@@ -143,7 +143,7 @@ pub async fn check_build() {
         calls::check_native_build();
         let _ = matrix_sdk::Client::builder();
     }
-    #[cfg(feature = "discord")]
+    #[cfg(all(feature = "discord", feature = "discord-full"))]
     {
         let _ = yapfast_discord::voice::live_microphone();
         check_opus();
@@ -153,7 +153,7 @@ pub async fn check_build() {
 /// Encodes a tone with Opus and decodes it again. Discord calls' Opus is the
 /// libopus inside libwebrtc's archive, called directly, so this checks it
 /// links and works on each platform.
-#[cfg(feature = "discord")]
+#[cfg(all(feature = "discord", feature = "discord-full"))]
 fn check_opus() {
     const RATE: u32 = 48_000;
     const FRAME: usize = RATE as usize / 50;
