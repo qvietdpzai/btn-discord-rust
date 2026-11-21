@@ -17,10 +17,12 @@ runs on a phone today, what stops the rest, and the order to take the stops in.
 
 What that workflow builds now: the bridge's host test passes; the three
 `libbtn_android.so` files are in the APK (645 KB arm64, 395 KB armv7, 603 KB
-x86_64); `app-debug.apk` is 1.7 MB; and the `discord` feature job compiles
-`yapfast-discord` for arm64, with voice, the OS credential store and game
-detection turned off. The protocol crate builds on Android, but nothing calls
-it yet: the shell still draws its own screen.
+x86_64); `app-debug.apk` is 1.7 MB; the `discord` feature job compiles
+`yapfast-discord` for arm64; and the `core` job compiles `yapfast-core` with
+`--no-default-features --features discord` for arm64, with voice (libwebrtc),
+the OS credential store, Lottie stickers, screen sharing, calls and game
+detection turned off. The model crate builds on Android now, so a sign-in
+screen can be built against `AppState` and the effects it returns.
 
 The Rust bridge exposes three calls:
 
