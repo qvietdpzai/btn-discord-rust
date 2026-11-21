@@ -484,8 +484,26 @@ impl Chat {
             event = next_live(&mut self.live) => Wake::Live(event),
             Some(finished) = self.finished.recv() => Wake::Finished(finished),
             _ = self.saving.tick() => Wake::Save,
-            #[cfg(not(target_os = "android"))]
-            wake = next_video(&mut self.video) => Wake::Video(wake),
+            wake = async {
+                #[cfg(not(target_os = "android"))]
+                {
+                    next_video(&mut self.video).await
+                }
+                #[cfg(target_os = "android")]
+                {
+                    std::future::pending::<()>().await
+                }
+            } => {
+                #[cfg(not(target_os = "android"))]
+                {
+                    Wake::Video(wake)
+                }
+                #[cfg(target_os = "android")]
+                {
+                    let _ = wake;
+                    Wake::Snapshot(None)
+                }
+            },
             report = next_voice_message(&mut self.voice_message) => Wake::VoiceMessage(report),
         }
     }
